@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Prime Number Calculation</title>
+    <title>Ops on datasets</title>
   </head>
 <body>
   <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
@@ -14,6 +14,8 @@
     <h5 id="workBook"></h5>
 
     <script>
+      var workbook;
+      
       document.getElementById("uploadForm").addEventListener("submit", uploadDataSet);
 
       function uploadDataSet(event) {
@@ -32,29 +34,58 @@
 
           reader.onload = (e) => {
             const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, {type: 'array'});
-            console.log(workbook);
-            document.getElementById('workBook').textContent = JSON.stringify(workbook);
+            workbook = XLSX.read(data, {type: 'array'});
+            disintegrate(workbook);
           } 
         }
           
       }
 
-      function disintegrate(){
+      function disintegrate(workBook) {
+        const sheetName = 'Sheet 1'; // Replace with the actual sheet name
+        const sheet = workbook.Sheets[sheetName]; // Get the sheet data from the workbook
+        const rows = Object.keys(sheet); // Get all row keys from the sheet
+        const chunkSize = 5;
+        const chunks = splitIntoChunks(rows, chunkSize);
 
-        // break into chunks
+        // Print the chunks
+        chunks.forEach((chunk, index) => {
+          console.log(`Chunk ${index + 1}:`, chunk);
+          document.getElementById('workBook').textContent = `${document.getElementById('workBook').textContent}
+          Chunk ${index + 1}: ${chunk}`;
+        });
 
         // send each chunk to displayWorker.js
-        const displayWorker = new Worker("./displayWorker.js");
-        displayWorker.postMessage({ start, end });
-        displayWorker.onmessage = function (event) {
-          const data = event.data;
-        };
-        displayWorker.onerror = function (error) {
-          console.log("An error occurred in the displayWorker:", error.message);
-        };
+        // const displayWorker = new Worker("./displayWorker.js");
+        // displayWorker.postMessage({ start, end });
+        // displayWorker.onmessage = function (event) {
+        //   const data = event.data;
+        // };
+        // displayWorker.onerror = function (error) {
+        //   console.log("An error occurred in the displayWorker:", error.message);
+        // };
 
       }
+
+      function splitIntoChunks(rows, chunkSize) {
+  const chunks = [];
+  let currentChunk = [];
+
+  for (let i = 0; i < rows.length; i++) {
+    currentChunk.push(rows[i]);
+
+    if (currentChunk.length === chunkSize) {
+      chunks.push(currentChunk);
+      currentChunk = [];
+    }
+  }
+
+  if (currentChunk.length > 0) {
+    chunks.push(currentChunk);
+  }
+
+  return chunks;
+}
 
     </script>
 
