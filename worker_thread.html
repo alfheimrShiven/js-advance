@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Prime Number Calculation</title>
+  </head>
+<body>
+  <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+
+    <form id="uploadForm">
+      <input type="file" id="uploadedDataSet" accept=".xls, .xlsx" />
+      <input type="submit" value="Upload DataSet!" />
+    </form>
+
+    <h5 id="workBook"></h5>
+
+    <script>
+      document.getElementById("uploadForm").addEventListener("submit", uploadDataSet);
+
+      function uploadDataSet(event) {
+        event.preventDefault();
+
+        const dataSet = document.getElementById('uploadedDataSet').files[0];
+
+        if(!dataSet)
+          alert('Pls upload a excel file')
+        else{
+          alert('File uploaded successfully!')
+
+          const reader = new FileReader();
+
+          reader.readAsArrayBuffer(dataSet);
+
+          reader.onload = (e) => {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            console.log(workbook);
+            document.getElementById('workBook').textContent = JSON.stringify(workbook);
+          } 
+        }
+          
+      }
+
+      function disintegrate(){
+
+        // break into chunks
+
+        // send each chunk to displayWorker.js
+        const displayWorker = new Worker("./displayWorker.js");
+        displayWorker.postMessage({ start, end });
+        displayWorker.onmessage = function (event) {
+          const data = event.data;
+        };
+        displayWorker.onerror = function (error) {
+          console.log("An error occurred in the displayWorker:", error.message);
+        };
+
+      }
+
+    </script>
+
+    
+  </body>
+</html>
